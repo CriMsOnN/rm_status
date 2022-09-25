@@ -1,11 +1,12 @@
 import { CircularProgress, CircularProgressLabel } from '@chakra-ui/react';
+import { IconType } from 'react-icons';
 
 type Props = {
   color: string;
   value: number;
   thickness: number;
   trackColor: string;
-  Icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  Icon: IconType;
   iconColor: string;
 };
 
@@ -16,8 +17,10 @@ const Circle: React.FC<Props> = ({ color, value, thickness, trackColor, iconColo
       value={value}
       thickness={thickness}
       trackColor={trackColor}
-      style={{
-        marginRight: '0.5%',
+      size="40px"
+      sx={{
+        marginRight: '5px',
+        filter: 'drop-shadow(0 0 2px #000)',
       }}
     >
       <CircularProgressLabel
@@ -27,7 +30,7 @@ const Circle: React.FC<Props> = ({ color, value, thickness, trackColor, iconColo
           alignItems: 'center',
         }}
       >
-        <Icon fontSize="20px" color={iconColor} />
+        <Icon fontSize="15px" color={iconColor} />
       </CircularProgressLabel>
     </CircularProgress>
   );

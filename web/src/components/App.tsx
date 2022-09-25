@@ -5,16 +5,13 @@ import { GiWaterDrop, GiHealthPotion, GiRun } from 'react-icons/gi';
 import Circle from './Circle';
 import { useNuiEvent } from '../hooks/useNuiEvent';
 import { useState } from 'react';
+import { MdKeyboardVoice } from 'react-icons/md';
 
 debugData([
   {
     action: 'setStatus',
     data: {
-      health: {
-        value: 100,
-        visible: true,
-      },
-      stamina: {
+      voice: {
         value: 100,
         visible: true,
       },
@@ -37,10 +34,9 @@ type Status = {
 };
 
 type StatusData = {
-  health: Status;
-  stamina: Status;
   hunger: Status;
   thirst: Status;
+  voice: Status;
 };
 
 type UpdateStatusProps = {
@@ -49,10 +45,9 @@ type UpdateStatusProps = {
 
 const App = () => {
   const [status, setStatus] = useState<StatusData>({
-    health: { value: 0, visible: true },
-    stamina: { value: 0, visible: true },
     hunger: { value: 0, visible: true },
     thirst: { value: 0, visible: true },
+    voice: { value: 0, visible: true },
   });
 
   useNuiEvent('setStatus', (data: StatusData) => {
@@ -63,46 +58,28 @@ const App = () => {
     setStatus((prev) => ({ ...prev, ...data }));
   });
 
+  useNuiEvent('playerTalk', (data: { isTalking: boolean }) => {
+    setStatus((prev) => ({ ...prev, voice: { ...prev.voice, value: data.isTalking ? 100 : 0 } }));
+  });
+
   return (
     <Box
-      style={{
-        width: '100%',
-        height: '100%',
-        display: 'flex',
-        justifyContent: 'flex-start',
-        alignItems: 'flex-end',
-        marginLeft: '5%',
+      sx={{
+        position: 'absolute',
+        bottom: '38px',
+        left: '140px',
+        ' > *': {
+          marginRight: '10px',
+        },
       }}
     >
-      {status.health && status.health.visible && (
-        <Circle
-          color={'gray.100'}
-          value={status.health.value}
-          thickness={11}
-          trackColor={'gray.900'}
-          iconColor={'red'}
-          Icon={GiHealthPotion}
-        />
-      )}
-
-      {status.stamina && status.stamina.visible && (
-        <Circle
-          color={'gray.100'}
-          value={status.stamina.value}
-          thickness={11}
-          trackColor={'gray.900'}
-          iconColor={'lightgreen'}
-          Icon={GiRun}
-        />
-      )}
-
       {status.hunger && status.hunger.visible && (
         <Circle
           color={'gray.100'}
           value={status.hunger.value}
-          thickness={11}
-          trackColor={'gray.900'}
-          iconColor={'orange'}
+          thickness={9}
+          trackColor={'black'}
+          iconColor={'white'}
           Icon={FaHamburger}
         />
       )}
@@ -111,10 +88,21 @@ const App = () => {
         <Circle
           color={'gray.100'}
           value={status.thirst.value}
-          thickness={11}
-          trackColor={'gray.900'}
-          iconColor={'cyan'}
+          thickness={9}
+          trackColor={'black'}
+          iconColor={'white'}
           Icon={GiWaterDrop}
+        />
+      )}
+
+      {status.voice && status.voice.visible && (
+        <Circle
+          color={status.voice.value > 0 ? 'green' : 'gray.100'}
+          value={100}
+          thickness={9}
+          trackColor={'black'}
+          iconColor={status.voice.value > 0 ? 'green' : 'white'}
+          Icon={MdKeyboardVoice}
         />
       )}
     </Box>

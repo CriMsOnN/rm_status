@@ -1,11 +1,11 @@
 local isFatigue = false
 local warmthTags = {
-     [265372629] = -1,
-     [-1938332139] = 1, -- WARM
-     [-821065926] = 2,
-     [-923980501] = 3,
-     [-1679966367] = 4,
- }
+    [265372629] = -1,
+    [-1938332139] = 1, -- WARM
+    [-821065926] = 2,
+    [-923980501] = 3,
+    [-1679966367] = 4,
+}
 local totalWarm = 0
 
 CreateThread(function()
@@ -21,37 +21,63 @@ end)
 
 
 CreateThread(function()
-    for i = 1, 12 do
-        Citizen.InvokeNative(0xC116E6DF68DCE667, i, 2)
-    end
+    -- Remove RPG Icons
+    Citizen.InvokeNative(0xC116E6DF68DCE667, 2, 2)
+    Citizen.InvokeNative(0xC116E6DF68DCE667, 3, 2)
+    Citizen.InvokeNative(0xC116E6DF68DCE667, 6, 2)
+    Citizen.InvokeNative(0xC116E6DF68DCE667, 7, 2)
+    Citizen.InvokeNative(0xC116E6DF68DCE667, 8, 2)
+    Citizen.InvokeNative(0xC116E6DF68DCE667, 9, 2)
     Wait(5000)
     while Client.isLoading do
         Wait(0)
     end
     SendNUIMessage({
         action = "setStatus",
-        data = Config.status
+        data = {
+            hunger = {
+                value = 100,
+                visible = true,
+            },
+            thirst = {
+                value = 100,
+                visible = true,
+            },
+            voice = {
+                value = 100,
+                visible = true
+            }
+        }
     })
     CreateThread(function()
+        local playerIsTalking = false
         while true do
-            Wait(1000)
-            local stamina = math.floor(Citizen.InvokeNative(0x775A1CA7893AA8B5, cache.ped, Citizen.ResultAsFloat()))
-                * 10
-            local health = math.floor(GetEntityHealth(cache.ped))
+            local sleep = 0
+            if MumbleIsPlayerTalking(PlayerId()) then
+                playerIsTalking = true
+            else
+                playerIsTalking = false
+            end
 
-            SendNUIMessage({
-                action = "updateStatus",
-                data = {
-                    stamina = {
-                        value = stamina,
-                        visible = true
-                    },
-                    health = {
-                        value = health,
-                        visible = true
+            if playerIsTalking then
+                SendNUIMessage({
+                    action = "playerTalk",
+                    data = {
+                        isTalking = true
                     }
-                }
-            })
+                })
+                sleep = 500
+            else
+                SendNUIMessage({
+                    action = "playerTalk",
+                    data = {
+                        isTalking = false
+                    }
+                })
+                sleep = 500
+            end
+
+            Wait(sleep)
         end
     end)
     CreateThread(function()
@@ -60,7 +86,7 @@ CreateThread(function()
             local temp = math.floor(GetTemperatureAtCoords(GetEntityCoords(cache.ped)))
             local warmth = getWarmthNeed(temp)
             local components = GetCurrentPedComponent(cache.ped)
-            for _,v in pairs(components) do
+            for _, v in pairs(components) do
                 for _, warmthValue in pairs(warmthTags) do
                     if Citizen.InvokeNative(0xFF5FB5605AD56856, v, warmthTag, 1120943070) then -- _ITEM_DATABASE_DOES_ITEM_HAVE_TAG
                         print(v, warmthTags[warmthTag], warmthTag)
@@ -80,7 +106,7 @@ CreateThread(function()
             end
         end
     end)
-    
+
     CreateThread(function()
         while true do
             if Client and Client.playerData.status ~= nil then
@@ -104,7 +130,7 @@ CreateThread(function()
                     SendNUIMessage({
                         action = "updateStatus",
                         data = {
-                             [k] = {
+                            [k] = {
                                 value = v,
                                 visible = true
                             }
@@ -146,7 +172,7 @@ RegisterNetEvent('rm_status:create', function(statusType, statusValue)
 end)
 
 function GetCurrentPedComponent(ped, category)
-    
+
     local componentsCount = Natives.GetNumComponentsInPed(ped)
     if not componentsCount then
         return 0
@@ -189,5 +215,3 @@ function startFatigue()
         print('On fatigue')
     end
 end
-
-
