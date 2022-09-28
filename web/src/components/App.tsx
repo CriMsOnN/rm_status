@@ -50,6 +50,10 @@ const App = () => {
     voice: { value: 0, visible: true },
   });
 
+  const [onMount, setOnMount] = useState<boolean>(false);
+
+  const [isTalking, setIsTalking] = useState<boolean>(false);
+
   useNuiEvent('setStatus', (data: StatusData) => {
     setStatus(data);
   });
@@ -59,7 +63,12 @@ const App = () => {
   });
 
   useNuiEvent('playerTalk', (data: { isTalking: boolean }) => {
-    setStatus((prev) => ({ ...prev, voice: { ...prev.voice, value: data.isTalking ? 100 : 0 } }));
+    // setStatus((prev) => ({ ...prev, voice: { ...prev.voice, value: data.isTalking ? 100 : 0 } }));
+    setIsTalking(data.isTalking);
+  });
+
+  useNuiEvent('onMount', (data: boolean) => {
+    setOnMount(data);
   });
 
   return (
@@ -71,6 +80,9 @@ const App = () => {
         ' > *': {
           marginRight: '10px',
         },
+        // 'div:nth-child(2)': {
+        //   marginLeft: onMount ? '60px' : '0px',
+        // },
       }}
     >
       {status.hunger && status.hunger.visible && (
@@ -92,16 +104,17 @@ const App = () => {
           trackColor={'black'}
           iconColor={'white'}
           Icon={GiWaterDrop}
+          onMount={onMount}
         />
       )}
 
       {status.voice && status.voice.visible && (
         <Circle
-          color={status.voice.value > 0 ? 'green' : 'gray.100'}
-          value={100}
+          color={isTalking ? 'green' : 'gray.100'}
+          value={status.voice.value}
           thickness={9}
           trackColor={'black'}
-          iconColor={status.voice.value > 0 ? 'green' : 'white'}
+          iconColor={isTalking ? 'green' : 'white'}
           Icon={MdKeyboardVoice}
         />
       )}

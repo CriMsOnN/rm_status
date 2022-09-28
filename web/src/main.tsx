@@ -9,7 +9,7 @@ import { isEnvBrowser } from './utils/misc';
 
 if (isEnvBrowser()) {
   const root = document.getElementById('root');
-  root!.style.backgroundImage = 'url("https://i.imgur.com/Zj6U16K.png")';
+  root!.style.backgroundImage = 'url("https://i.imgur.com/yamX4aP.png")';
   root!.style.backgroundSize = '100% 100%';
   root!.style.backgroundRepeat = 'no-repeat';
   root!.style.backgroundPosition = 'center';

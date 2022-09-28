@@ -7,13 +7,31 @@ local warmthTags = {
     [-1679966367] = 4,
 }
 local totalWarm = 0
+local isStatusChanged = false
+local voiceVolume = 30
 
 CreateThread(function()
     while true do
-        if IsPedOnMount(cache.ped) or IsPedInAnyVehicle(cache.ped) then
-            DisplayRadar(true)
-        else
-            DisplayRadar(false)
+        if IsPedOnMount(cache.ped) or IsPedInAnyVehicle(cache.ped) and not isStatusChanged then
+            isStatusChanged = true
+            SendNUIMessage({
+                action = "onMount",
+                data = true
+            })
+            Citizen.InvokeNative(0xC116E6DF68DCE667, 6, 1)
+            Citizen.InvokeNative(0xC116E6DF68DCE667, 7, 1)
+            Citizen.InvokeNative(0xC116E6DF68DCE667, 8, 1)
+            Citizen.InvokeNative(0xC116E6DF68DCE667, 9, 1)
+        elseif isStatusChanged then
+            isStatusChanged = false
+            SendNUIMessage({
+                action = "onMount",
+                data = false
+            })
+            Citizen.InvokeNative(0xC116E6DF68DCE667, 6, 2)
+            Citizen.InvokeNative(0xC116E6DF68DCE667, 7, 2)
+            Citizen.InvokeNative(0xC116E6DF68DCE667, 8, 2)
+            Citizen.InvokeNative(0xC116E6DF68DCE667, 9, 2)
         end
         Wait(1000)
     end
@@ -24,10 +42,6 @@ CreateThread(function()
     -- Remove RPG Icons
     Citizen.InvokeNative(0xC116E6DF68DCE667, 2, 2)
     Citizen.InvokeNative(0xC116E6DF68DCE667, 3, 2)
-    Citizen.InvokeNative(0xC116E6DF68DCE667, 6, 2)
-    Citizen.InvokeNative(0xC116E6DF68DCE667, 7, 2)
-    Citizen.InvokeNative(0xC116E6DF68DCE667, 8, 2)
-    Citizen.InvokeNative(0xC116E6DF68DCE667, 9, 2)
     Wait(5000)
     while Client.isLoading do
         Wait(0)
@@ -36,15 +50,15 @@ CreateThread(function()
         action = "setStatus",
         data = {
             hunger = {
-                value = 100,
+                value = LocalPlayer.state.hunger,
                 visible = true,
             },
             thirst = {
-                value = 100,
+                value = LocalPlayer.state.thirst,
                 visible = true,
             },
             voice = {
-                value = 100,
+                value = 30,
                 visible = true
             }
         }
@@ -159,15 +173,29 @@ function getWarmthNeed(temp)
     return warmNeed
 end
 
-RegisterNetEvent('status:updateStatus', function(statusType, statusValue)
-    if Client.playerData.status[statusType] then
-        Client.playerData.status[statusType] = statusValue
-    end
-end)
+-- RegisterNetEvent('status:updateStatus', function(statusType, statusValue)
+--     if Client.playerData.status[statusType] then
+--         Client.playerData.status[statusType] = statusValue
+--     end
+-- end)
 
 RegisterNetEvent('rm_status:create', function(statusType, statusValue)
     if not Client.status[statusType] then
         Client.status[statusType] = statusValue
+    end
+end)
+
+AddStateBagChangeHandler('hunger', nil, function(_, key, value, _, _)
+    if value then
+        Wait(50)
+        Client.playerData.status[key] = value
+    end
+end)
+
+AddStateBagChangeHandler('thirst', nil, function(_, key, value, _, _)
+    if value then
+        Wait(50)
+        Client.playerData.status[key] = value
     end
 end)
 
